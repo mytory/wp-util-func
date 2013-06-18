@@ -1,4 +1,8 @@
 <?
+/**
+ * author: mytory
+ */
+
 if( ! function_exists('fu_enable_hwp_attach')){
     /**
      * hwp 업로드 가능하도록.
@@ -12,7 +16,7 @@ if( ! function_exists('fu_enable_hwp_attach')){
     add_filter('upload_mimes', 'fu_enable_hwp_attach');
 }
 
-if( ! function_exists('plus21_get_img_src')){
+if( ! function_exists('fu_get_img_src')){
     /**
      * 루프 안에서 글에 있는 이미지 src를 추출한다. 특성 이미지가 설정돼 있으면 특성 이미지를 가져 온다.
      * 특성 이미지가 없으면 본문에 나오는 첫 번째 img 태그를 파싱해서 경로를 가져 온다.

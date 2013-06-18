@@ -1,6 +1,7 @@
 <?
 /**
  * author: mytory
+ * 이 파일은 하위호환성을 보장하지 않습니다. 그냥 그 때 그 때 가져다 쓰세요.
  */
 
 if( ! function_exists('fu_enable_hwp_attach')){

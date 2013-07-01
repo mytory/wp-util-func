@@ -80,8 +80,8 @@ if( ! function_exists('fu_get_list_href')){
      * 리퍼러가 없는 경우엔 자동으로 taxonomy와 term을 가져와서 링크를 만든다.
      * 여러 개의 taxonomy와 여러 개의 term에 속한 글인 경우엔
      * 워드프레스가 돌려준 배열의 첫 번째 놈을 선택해서 링크를 돌려 준다.
-     * @param null $taxonomy
-     * @param null $term
+     * @param null|string $taxonomy
+     * @param null|string $term
      * @return string|WP_Error
      */
     function fu_get_list_url($taxonomy = NULL, $term = NULL){

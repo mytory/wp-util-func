@@ -74,7 +74,7 @@ if( ! function_exists('fu_get_thumb_src')){
     }
 }
 
-if( ! function_exists('fu_get_list_href')){
+if( ! function_exists('fu_get_list_url')){
     /**
      * post 형식 글의 single 페이지에 달 목록 버튼의 링크를 리턴한다. 일단, 리퍼러가 있으면 리퍼러를 출력한다.
      * 리퍼러가 없는 경우엔 자동으로 taxonomy와 term을 가져와서 링크를 만든다.

@@ -73,3 +73,68 @@ if( ! function_exists('fu_get_thumb_src')){
         return $upload_path['baseurl'] . $new_filepath;
     }
 }
+
+if( ! function_exists('fu_get_list_href')){
+    /**
+     * post 형식 글의 single 페이지에 달 목록 버튼의 링크를 리턴한다. 일단, 리퍼러가 있으면 리퍼러를 출력한다.
+     * 리퍼러가 없는 경우엔 자동으로 taxonomy와 term을 가져와서 링크를 만든다.
+     * 여러 개의 taxonomy와 여러 개의 term에 속한 글인 경우엔
+     * 워드프레스가 돌려준 배열의 첫 번째 놈을 선택해서 링크를 돌려 준다.
+     * @param null $taxonomy
+     * @param null $term
+     * @return string|WP_Error
+     */
+    function fu_get_list_url($taxonomy = NULL, $term = NULL){
+        global $post;
+        if(isset($_SERVER['HTTP_REFERER'])){
+            return $_SERVER['HTTP_REFERER'];
+        }else{
+            if( ! $taxonomy){
+                $taxonomies = get_post_taxonomies();
+                $taxonomy = $taxonomies[0];
+            }
+            if( ! $term){
+                $terms = wp_get_post_terms($post->ID, $taxonomy);
+                $term = $terms[0];
+            }
+            return get_term_link($term);
+        }
+    }
+}
+
+if( ! function_exists('fu_get_menu_item_info')){
+    /**
+     * 현재 페이지, 포스트, 카테고리의 메뉴에서의 위치를 파악해서 메뉴 아이템을 반환.
+     * @return array
+     */
+    function fu_get_menu_item_info(){
+        $queried_object = get_queried_object();
+        if(isset($queried_object->taxonomy)){
+            $object = $queried_object->taxonomy;
+            $object_id = $queried_object->term_id;
+        }else if(isset($queried_object->post_type)){
+            $object = $queried_object->post_type;
+            $object_id = $queried_object->ID;
+        }
+
+        if($queried_object->post_type == 'post'){
+            $object = 'category';
+            // TODO 포스트가 속한 카테고리 ID를 가져와야 한다.
+            $object_id = $queried_object->ID;
+        }
+
+        $menu_items = wp_get_nav_menu_items('basic');
+        $info = array();
+        foreach ($menu_items as $item) {
+            if($item->object == $object AND $item->object_id == $object_id){
+                $info['current'] = $item;
+            }
+        }
+        foreach ($menu_items as $item) {
+            if($item->ID == $info['current']->menu_item_parent){
+                $info['parent'] = $item;
+            }
+        }
+        return $info;
+    }
+}

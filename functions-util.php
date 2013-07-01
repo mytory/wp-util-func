@@ -138,3 +138,63 @@ if( ! function_exists('fu_get_menu_item_info')){
         return $info;
     }
 }
+
+
+if( ! function_exists('fu_get_post_navi')){
+    /**
+     * 언제나 작동하는 이전글, 다음글 함수
+     * custom post type의 custom taxonomy에서도 잘 작동한다.
+     * @param string $post_date
+     * @param int $term_id
+     * @param boolean $auto_term_id term_id를 입력하지 않은 경우 자동으로 불러오게 할 건지
+     * @return array
+     */
+    function fu_get_post_navi($post_date, $term_id = 0, $auto_term_id = TRUE){
+        global $post, $table_prefix;
+        if( ! $term_id AND $auto_term_id){
+            $taxonomies = get_post_taxonomies();
+            $taxonomy = $taxonomies[0];
+            $terms = wp_get_post_terms($post->ID, $taxonomy);
+            $term = $terms[0];
+            $term_id = $term->term_id;
+        }
+
+        $navi = array();
+
+        if( ! $term_id AND ! $auto_term_id){
+            $navi['older'] = get_previous_post();
+            $navi['newer'] = get_next_post();
+            return $navi;
+        }
+
+        // 이전 글 불러 오기
+        $sql = "SELECT p.*
+        FROM `{$table_prefix}posts` p, `{$table_prefix}term_relationships` r
+        WHERE p.ID = r.object_id
+            AND r.term_taxonomy_id = '$term_id'
+            AND p.post_status = 'publish'
+            AND p.post_date > '$post_date'
+        ORDER BY post_date ASC
+        LIMIT 1";
+        $result = mysql_query($sql);
+        if(mysql_num_rows($result) > 0){
+            $navi['newer'] = (OBJECT)mysql_fetch_assoc($result);
+        }
+
+        // 다음 글 불러 오기
+        $sql = "SELECT p.*
+        FROM `{$table_prefix}posts` p, `{$table_prefix}term_relationships` r
+        WHERE p.ID = r.object_id
+            AND r.term_taxonomy_id = '$term_id'
+            AND p.post_status = 'publish'
+            AND p.post_date < '$post_date'
+        ORDER BY post_date DESC
+        LIMIT 1";
+        $result = mysql_query($sql);
+        if(mysql_num_rows($result) > 0){
+            $navi['older'] = (OBJECT)mysql_fetch_assoc($result);
+        }
+
+        return $navi;
+    }
+}

@@ -97,7 +97,15 @@ if( ! function_exists('fu_get_list_url')){
                 $terms = wp_get_post_terms($post->ID, $taxonomy);
                 $term = $terms[0];
             }
-            return get_term_link($term);
+            if($term){
+
+                // term 로드 결과 있으면
+                return get_term_link($term);
+            }else{
+
+                // 없으면(custom post type의 경우 term이 아예 없을 수 있다.)
+                return home_url('?post_type=' . $post->post_type);
+            }
         }
     }
 }

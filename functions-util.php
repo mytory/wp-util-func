@@ -25,6 +25,9 @@ if( ! function_exists('fu_get_img_src')){
      */
     function fu_get_img_src(){
         global $post;
+        if( ! isset($post)){
+            return '';
+        }
         $img_src = NULL;
 
         $post_thumbnail_id = get_post_thumbnail_id();

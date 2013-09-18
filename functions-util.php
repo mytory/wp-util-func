@@ -34,7 +34,11 @@ if( ! function_exists('fu_get_img_src')){
             $img_src = $tmp[0];
         }else{
             preg_match("/<img.+?src=[\"'](.+?)[\"'].+?>/", $post->post_content, $imgs);
-            $img_src = $imgs[1];
+            if( ! empty($imgs)){
+                $img_src = $imgs[1];
+            }else{
+                $img_src = '';
+            }
         }
         return $img_src;
     }

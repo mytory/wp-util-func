@@ -36,7 +36,8 @@ if( ! function_exists('fu_get_img_src')){
             $tmp = wp_get_attachment_image_src($post_thumbnail_id);
             $img_src = $tmp[0];
         }else{
-            preg_match("/<img.+?src=[\"'](.+?)[\"'].+?>/", $post->post_content, $imgs);
+            $filtered_content = apply_filters('the_content', $post->post_content);
+            preg_match("/<img.+?src=[\"'](.+?)[\"'].+?>/", $filtered_content, $imgs);
             if( ! empty($imgs)){
                 $img_src = $imgs[1];
             }else{

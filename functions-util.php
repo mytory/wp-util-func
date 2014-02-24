@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * author: mytory
  * 이 파일은 하위호환성을 보장하지 않습니다. 그냥 그 때 그 때 가져다 쓰세요.
@@ -17,6 +17,33 @@ if( ! function_exists('fu_enable_hwp_attach')){
     add_filter('upload_mimes', 'fu_enable_hwp_attach');
 }
 
+if( ! function_exists('fu_get_post_thumbnail_id')){
+
+    function fu_get_post_thumbnail_id(){
+        global $post;
+        if( ! isset($post)){
+            return '';
+        }
+
+        $post_thumbnail_id = get_post_thumbnail_id();
+
+        if( ! $post_thumbnail_id){
+            $args = array(
+                'post_type' => 'attachment',
+                'post_mime_type' => 'image',
+                'post_parent' => $post->ID
+            );
+            $images = get_posts($args);
+            if(count($images) > 0){
+                $post_thumbnail_id = $images[0]->ID;    
+            }
+        }
+
+        return $post_thumbnail_id;
+    }
+
+}
+
 if( ! function_exists('fu_get_img_src')){
     /**
      * 루프 안에서 글에 있는 이미지 src를 추출한다. 특성 이미지가 설정돼 있으면 특성 이미지를 가져 온다.
@@ -32,6 +59,18 @@ if( ! function_exists('fu_get_img_src')){
 
         $post_thumbnail_id = get_post_thumbnail_id();
 
+        if( ! $post_thumbnail_id){
+            $args = array(
+                'post_type' => 'attachment',
+                'post_mime_type' => 'image',
+                'post_parent' => $post->ID
+            );
+            $images = get_posts($args);
+            if(count($images) > 0){
+                $post_thumbnail_id = $images[0]->ID;    
+            }
+        }
+
         if($post_thumbnail_id){
             $tmp = wp_get_attachment_image_src($post_thumbnail_id);
             $img_src = $tmp[0];
@@ -40,8 +79,6 @@ if( ! function_exists('fu_get_img_src')){
             preg_match("/<img.+?src=[\"'](.+?)[\"'].+?>/", $filtered_content, $imgs);
             if( ! empty($imgs)){
                 $img_src = $imgs[1];
-            }else{
-                $img_src = '';
             }
         }
         return $img_src;
@@ -57,23 +94,31 @@ if( ! function_exists('fu_get_thumb_src')){
      * @param  int $height
      * @return string 썸네일의 URL
      */
-    function fu_get_thumb_src($attachment_id, $width, $height){
+    function fu_get_thumb_src($attachment_id, $width, $height, $crop = false){
         $filepath = get_attached_file($attachment_id);
         $upload_path = wp_upload_dir();
         $basedir = $upload_path['basedir'];
 
         // filepath가 $basedir까지 포함하고 있는 경우가 있음.
         $filepath = str_replace($basedir, '', $filepath);
-        $fullpath = $basedir . $filepath;
+        $fullpath = $basedir . '/' . $filepath;
+        $fullpath = str_replace('//', '/', $fullpath);
         if( ! is_file($fullpath)){
             return FALSE;
         }
         $pathinfo = pathinfo($fullpath);
+        if( ! $crop){
+            $size = getimagesize($fullpath);
+            $current_width = $size[0];
+            $current_height = $size[1];
+            $height = floor($width * $current_height / $current_width);
+        }
+
         $new_fullpath = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . "-{$width}x{$height}" . '.' . $pathinfo['extension'];
         if( ! is_file($new_fullpath)){
             $image = wp_get_image_editor($fullpath);
             if ( ! is_wp_error( $image ) ) {
-                $image->resize( $width, $height, false );
+                $image->resize( $width, $height, $crop );
                 $image->save( $new_fullpath );
             }
         }
